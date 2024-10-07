@@ -1,9 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 :root {
-  --background: #ffffff;
+  --background: #26232e;
   --foreground: #171717;
 }
 
@@ -14,10 +14,15 @@
   }
 }
 
+
 body {
+  max-width: 1440px;
   color: var(--foreground);
-  background: var(--background);
+  background:var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  margin: 0 auto;
+  padding: 0;
+  min-height: 100vh;
 }
 
 @layer utilities {
@@ -25,3 +30,8 @@ body {
     text-wrap: balance;
   }
 }
+
+h1, p {
+  color: white;
+}
+
