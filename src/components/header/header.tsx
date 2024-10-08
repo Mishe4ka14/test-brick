@@ -10,7 +10,7 @@ const Header = () => {
   const isSeriesPage = pathname.startsWith('/details/series');
 
   return (
-    <header>
+    <header className='lg:ml-20'>
       <h1 className='font-bold first-letter:text-red-700 text-3xl'>Вселенная Рик и Морти</h1>
       {isHomePage && (
         <p>

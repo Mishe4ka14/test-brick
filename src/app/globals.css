@@ -23,17 +23,17 @@ body {
   min-height: 100vh;
   padding: 20px;
   display: flex;
-  justify-content: center; /* Центрируем контент по горизонтали */
-  align-items: flex-start; /* Выравнивание контента по верхнему краю страницы */
-  
+  justify-content: center; 
+  align-items: flex-start;
+  overflow-x: hidden;
   @media (max-width: 640px) {
     padding: 10px;
   }
 }
 
 .container {
-  width: 100%; /* Ширина на 100% */
-  max-width: 1440px; /* Ограничение по ширине */
+  width: 100%; 
+  max-width: 1440px; 
   margin: 0 auto;
   padding: 20px;
   border: 1px solid white;
@@ -53,11 +53,9 @@ body {
 
 h1, p {
   color: white;
-  /* margin: 0; */
   padding: 0;
 }
 
 h4 {
-  /* margin: 0; */
   padding: 0;
 }
