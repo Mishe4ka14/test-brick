@@ -21,3 +21,18 @@ export interface ICharArray {
   }; 
   results: IChar[];
 }
+
+export interface FullType extends IChar {
+  type: string;
+  origin: {
+    name: string;
+    url: string;
+  };
+  location: {
+    name: string;
+    url: string;
+  };
+  episode: string[];
+  url: string;
+  created: string;
+}

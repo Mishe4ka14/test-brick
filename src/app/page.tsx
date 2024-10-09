@@ -20,6 +20,7 @@ const HomePage: React.FC = () => {
   const [noResults, setNoResults] = useState<boolean>(false);
   const [character, setCharacter] = useState<ICharArray | null>(null);
   const [showCharacter, setShowCharacter] = useState(false);
+  const [noTimer, setNoTimer] = useState(false);
 
   // Фильтры без "unknown" значений
   const filters = {
@@ -35,8 +36,10 @@ const HomePage: React.FC = () => {
         filters.name = transliterate(filters.name);
       }
       setCharacter(null);
+      sessionStorage.removeItem('foundCharacters');
       const randomCharacter = await fetchUniversalFunction(filters);
       setCharacter('results' in randomCharacter ? randomCharacter : { info: { count: 1, next: null, pages: 1 }, results: [randomCharacter] });
+      sessionStorage.setItem('foundCharacters', JSON.stringify(randomCharacter));
     } catch (error) {
       console.error('Ошибка при получении персонажа:', error);
       const timer = setTimeout(() => setNoResults(true), 3000);
@@ -44,9 +47,21 @@ const HomePage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const savedCharacters = sessionStorage.getItem('foundCharacters');
+    if (savedCharacters) {
+      setNoTimer(true);
+      setCharacter(JSON.parse(savedCharacters));
+    }
+  }, []);
+
   useEffect(() => { //эффект для задержки отрисовки
     if (character) {
       setShowCharacter(false);
+      if(noTimer){
+        setShowCharacter(true)
+        setNoTimer(false);
+      } else {}
       const timer = setTimeout(() => setShowCharacter(true), 3000);
       return () => clearTimeout(timer);
     }
@@ -81,6 +96,8 @@ const HomePage: React.FC = () => {
     setRace(undefined);
     setName('');
     setNoResults(false);
+    setCharacter(null);
+    sessionStorage.removeItem('foundCharacters')
   };
 
   return (
@@ -115,7 +132,13 @@ const HomePage: React.FC = () => {
           <FilterSelect label="Раса" value={race} onChange={(value) => handleChangeFilter('race', value)} options={filterOptions.race} />
           <SearchButton onClick={handleSearch} />
         </div>
-        <button onClick={handleClearFilters}>сбросить фильтры</button>
+        <button 
+          className="lg:ml-20 mt-2 bg-transparent text-gray-300 border border-gray-500 rounded-md text-sm px-2 py-1
+          transition-colors duration-300 hover:bg-[#363249] hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+          onClick={handleClearFilters}
+        >
+          сбросить фильтры
+        </button>
       </main>
 
       {showCharacter && (
