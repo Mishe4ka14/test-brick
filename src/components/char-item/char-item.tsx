@@ -1,35 +1,35 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { getRandomGradient } from "@/hooks/get-random-gradient";
+import { IChar } from "@/types/types";
 
 interface CharItemProps {
-  name: string;
-  species: string;
-  gender: string;
+  character: IChar
 }
 
-export const CharItem: React.FC<CharItemProps> = ({ name, species, gender }) => {
-  const itemRef = useRef<HTMLDivElement | null>(null); // Создаем ссылку на элемент
-
+export const CharItem: React.FC<CharItemProps> = ({ character }) => {
+  const itemRef = useRef<HTMLDivElement | null>(null); 
   const randomColor = getRandomGradient();
 
+  const {name, species, gender} = character;
+
   useEffect(() => {
-    // Анимация при монтировании компонента
     if (itemRef.current) {
-      gsap.fromTo(itemRef.current, 
-        { scale: 0, opacity: 0 }, // Начальное состояние
-        { scale: 1, opacity: 1, duration: 1 } // Конечное состояние
+      gsap.fromTo(
+        itemRef.current, 
+        { scale: 0, opacity: 0 }, 
+        { scale: 1, opacity: 1, duration: 1 }
       );
     }
-  }, []); // Запускаем эффект только при монтировании компонента
+  }, []); 
 
   return (
     <div 
-      ref={itemRef} // Привязываем ссылку к элементу
+      ref={itemRef} 
       className="flex flex-col sm:flex-row sm:justify-start sm:gap-[10vw] sm:items-center mt-[2vh] p-4 lg:ml-20 border border-white rounded-lg bg-[#26232e]"
     >
       <h4
-        className="text-lg font-semibold"
+        className="text-lg font-extrabold"
         style={{
           background: randomColor,
           WebkitBackgroundClip: 'text',
@@ -38,8 +38,32 @@ export const CharItem: React.FC<CharItemProps> = ({ name, species, gender }) => 
       >
         {name}
       </h4>
-      <p className="text-sm">Раса: {species}</p>
-      <p className="text-sm">Пол: {gender}</p>
+      <div className="flex">
+        <p className="text-sm">Раса:&nbsp;</p>
+        <p
+          className="text-sm"
+          style={{
+            background: randomColor,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          {species}
+        </p>
+      </div>
+      <div className="flex">
+        <p className="text-sm">Пол:&nbsp;</p>
+        <p
+          className="text-sm"
+          style={{
+            background: randomColor,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          {gender}
+        </p>
+      </div>
     </div>
   );
 };

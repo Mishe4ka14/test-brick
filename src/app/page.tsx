@@ -1,37 +1,70 @@
 'use client';
 
 import Header from "@/components/header/header";
-import { useState } from "react";
-import { Button, Input, Select } from 'antd';
-import icon from '../assets/275032.png';
+import { useState, useEffect } from "react";
+import { Input, Select } from 'antd';
 import SearchButton from "@/components/button/button";
-import { fetchRandomCharacters } from "@/api/characters.api";
-import { IChar } from "@/types/types";
+import { fetchUniversalFunction } from "@/api/characters.api";
+import { ICharArray } from "@/types/types";
 import { CharItem } from "@/components/char-item/char-item";
-const { Option } = Select;
+import { filterOptions } from "@/utils/filtered-options";
+import { FilterSelect } from "@/components/filter-select/filter-select";
 
-const HomePage = () => {
-  const [status, setStatus] = useState('unknown');
-  const [gender, setGender] = useState('unknown');
-  const [race, setRace] = useState('unknown');
+const HomePage: React.FC = () => {
+  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [gender, setGender] = useState<string | undefined>(undefined);
+  const [race, setRace] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
-  const [character, setCharacter] = useState<IChar[]>([]); // Инициализация как пустой массив
-  const [showCharacter, setShowCharacter] = useState(false); // Состояние для управления отображением персонажа
+  const [character, setCharacter] = useState<ICharArray | null>(null);
+  const [showCharacter, setShowCharacter] = useState(false);
+
+  // Фильтры без "unknown" значений
+  const filters = {
+    ...(status !== 'unknown' && status !== undefined && { status }),
+    ...(gender !== 'unknown' && gender !== undefined && { gender }),
+    ...(race !== 'unknown' && race !== undefined && { race })
+  };
 
   const handleSearch = async () => {
     try {
-      const randomCharacter = await fetchRandomCharacters();
-      setCharacter(Array.isArray(randomCharacter) ? randomCharacter : [randomCharacter]);
-      console.log('Полученные персонажи:', randomCharacter);
-      
-      // Устанавливаем задержку перед отображением персонажа
-      setShowCharacter(false); // Скрываем персонажа
-      setTimeout(() => {
-        setShowCharacter(true); // Показываем персонажа через 1 секунду
-      }, 3000); // 1000 миллисекунд = 1 секунда
+      const randomCharacter = await fetchUniversalFunction(filters);
+      setCharacter('results' in randomCharacter ? randomCharacter : { info: { count: 1, next: null, pages: 1 }, results: [randomCharacter] });
     } catch (error) {
       console.error('Ошибка при получении персонажа:', error);
     }
+  };
+
+  useEffect(() => { //эффект для задержки отрисовки
+    if (character) {
+      setShowCharacter(false);
+      const timer = setTimeout(() => setShowCharacter(true), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [character]);
+
+  useEffect(() => { //выставляем значения из стораджа
+    const savedFilters = sessionStorage.getItem('characterFilters');
+    if (savedFilters) {
+      const { status, gender, race } = JSON.parse(savedFilters);
+      setStatus(status || undefined);
+      setGender(gender || undefined);
+      setRace(race || undefined);
+    }
+  }, []);
+
+  const handleChangeFilter = (filterType: 'status' | 'gender' | 'race', value: string | undefined) => {
+    const newValue = value === 'unknown' ? undefined : value;
+    sessionStorage.setItem('characterFilters', JSON.stringify({ ...filters, [filterType]: newValue }));
+    if (filterType === 'status') setStatus(newValue);
+    if (filterType === 'gender') setGender(newValue);
+    if (filterType === 'race') setRace(newValue);
+  };
+
+  const handleClearFilters = () => {
+    sessionStorage.removeItem('characterFilters');
+    setStatus(undefined);
+    setGender(undefined);
+    setRace(undefined);
   };
 
   return (
@@ -53,81 +86,28 @@ const HomePage = () => {
         </div>
 
         <div className="flex justify-around md:justify-start md:gap-10 lg:ml-20 mt-10">
-          <div className="flex flex-col items-center">
-            <div className="flex flex-col items-start">
-              <label className="mb-1 text-white">
-                <h4>Жив???</h4>
-              </label>
-              <Select
-                value={status}
-                onChange={(value) => setStatus(value)}
-                className="w-[40vw] sm:w-[40vw] md:w-[40vw] lg:w-[30vw]"
-                placeholder="Выберите статус"
-              >
-                <Option value="unknown">Неизвестно</Option>
-                <Option value="alive">Жив</Option>
-                <Option value="dead">Мертв</Option>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center">
-            <div className="flex flex-col items-start">
-              <label className="mb-1 text-white">
-                <h4>Пол</h4>
-              </label>
-              <Select
-                value={gender}
-                onChange={(value) => setGender(value)}
-                className="w-[40vw] sm:w-[40vw] md:w-[40vw] lg:w-[30vw]"
-                placeholder="Выберите гендер"
-              >
-                <Option value="unknown">Неизвестно</Option>
-                <Option value="male">Мужчина</Option>
-                <Option value="female">Женщина</Option>
-                <Option value="genderless">Без пола</Option>
-              </Select>
-            </div>
-          </div>
+          <FilterSelect label="Жив???" value={status} onChange={(value) => handleChangeFilter('status', value)} options={filterOptions.status} />
+          <FilterSelect label="Пол" value={gender} onChange={(value) => handleChangeFilter('gender', value)} options={filterOptions.gender} />
         </div>
 
         <div className="flex items-center justify-start gap-10 lg:ml-20 mt-10">
-          <div className="flex flex-col items-center">
-            <div className="flex flex-col items-start">
-              <label className="mb-1 text-white">
-                <h4>Раса</h4>
-              </label>
-              <Select
-                value={race}
-                onChange={(value) => setRace(value)}
-                className="w-[40vw] sm:w-[40vw] md:w-[40vw] lg:w-[30vw]"
-                placeholder="Выберите расу"
-              >
-                <Option value="unknown">Неизвестно</Option>
-                <Option value="parasite">Паразит</Option>
-                <Option value="human">Человек</Option>
-                <Option value="alien">Пришелец</Option>
-                <Option value="humanoid">Гуманоид</Option>
-              </Select>
-            </div>
-          </div>
+          <FilterSelect label="Раса" value={race} onChange={(value) => handleChangeFilter('race', value)} options={filterOptions.race} />
           <SearchButton onClick={handleSearch} />
         </div>
-
-        {/* Отображение персонажей с задержкой */}
-        {showCharacter && character.length > 0 && 
-          character.map((item) => (
-            <CharItem
-              key={item.id}
-              name={item.name}
-              species={item.species}
-              gender={item.gender}
-            />
-          ))
-        }
+        <button onClick={handleClearFilters}>сбросить фильтры</button>
       </main>
+
+      {showCharacter && (
+        <div>
+          {character && 'results' in character ? (
+            character.results.map((char) => <CharItem key={char.id} character={char} />)
+          ) : (
+            character && <CharItem character={character} />
+          )}
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default HomePage;
