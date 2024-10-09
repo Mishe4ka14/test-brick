@@ -6,15 +6,18 @@ import { Input, Select } from 'antd';
 import SearchButton from "@/components/button/button";
 import { fetchUniversalFunction } from "@/api/characters.api";
 import { ICharArray } from "@/types/types";
-import { CharItem } from "@/components/char-item/char-item";
+import CharItem from "@/components/char-item/char-item";
 import { filterOptions } from "@/utils/filtered-options";
 import { FilterSelect } from "@/components/filter-select/filter-select";
+import { transliterate } from "@/hooks/translitirate";
+import NoResults from "@/components/no-results/no-results";
 
 const HomePage: React.FC = () => {
   const [status, setStatus] = useState<string | undefined>(undefined);
   const [gender, setGender] = useState<string | undefined>(undefined);
   const [race, setRace] = useState<string | undefined>(undefined);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [name, setName] = useState<string | undefined>('');
+  const [noResults, setNoResults] = useState<boolean>(false);
   const [character, setCharacter] = useState<ICharArray | null>(null);
   const [showCharacter, setShowCharacter] = useState(false);
 
@@ -22,15 +25,22 @@ const HomePage: React.FC = () => {
   const filters = {
     ...(status !== 'unknown' && status !== undefined && { status }),
     ...(gender !== 'unknown' && gender !== undefined && { gender }),
-    ...(race !== 'unknown' && race !== undefined && { race })
+    ...(race !== 'unknown' && race !== undefined && { race }),
+    ...(name !== '' && name !== undefined && { name })
   };
 
   const handleSearch = async () => {
     try {
+      if(filters.name){
+        filters.name = transliterate(filters.name);
+      }
+      setCharacter(null);
       const randomCharacter = await fetchUniversalFunction(filters);
       setCharacter('results' in randomCharacter ? randomCharacter : { info: { count: 1, next: null, pages: 1 }, results: [randomCharacter] });
     } catch (error) {
       console.error('Ошибка при получении персонажа:', error);
+      const timer = setTimeout(() => setNoResults(true), 3000);
+      return () => clearTimeout(timer);
     }
   };
 
@@ -45,26 +55,32 @@ const HomePage: React.FC = () => {
   useEffect(() => { //выставляем значения из стораджа
     const savedFilters = sessionStorage.getItem('characterFilters');
     if (savedFilters) {
-      const { status, gender, race } = JSON.parse(savedFilters);
+      const { status, gender, race, name } = JSON.parse(savedFilters);
       setStatus(status || undefined);
       setGender(gender || undefined);
       setRace(race || undefined);
+      setName(name || undefined);
     }
   }, []);
 
-  const handleChangeFilter = (filterType: 'status' | 'gender' | 'race', value: string | undefined) => {
-    const newValue = value === 'unknown' ? undefined : value;
+  const handleChangeFilter = (filterType: 'status' | 'gender' | 'race' | 'name', value: string | undefined) => {
+    const newValue = (value === 'unknown' || '') ? undefined : value;
     sessionStorage.setItem('characterFilters', JSON.stringify({ ...filters, [filterType]: newValue }));
     if (filterType === 'status') setStatus(newValue);
     if (filterType === 'gender') setGender(newValue);
     if (filterType === 'race') setRace(newValue);
+    if (filterType === 'name') setName(newValue);
+    setNoResults(false);
   };
 
+  
   const handleClearFilters = () => {
     sessionStorage.removeItem('characterFilters');
     setStatus(undefined);
     setGender(undefined);
     setRace(undefined);
+    setName('');
+    setNoResults(false);
   };
 
   return (
@@ -77,8 +93,13 @@ const HomePage: React.FC = () => {
               <h4>Имя персонажа</h4>
             </label>
             <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={name}
+              onChange={(e) => {
+                const value = e.target.value;
+                setName(value); 
+                handleChangeFilter('name', value);
+              }}
+              
               placeholder="Введите имя персонажа..."
               className="w-[90vw] sm:w-[70vw] md:w-[50vw]"
             />
@@ -105,6 +126,9 @@ const HomePage: React.FC = () => {
             character && <CharItem character={character} />
           )}
         </div>
+      )}
+      {noResults && (
+        <NoResults/>
       )}
     </div>
   );

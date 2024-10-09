@@ -11,6 +11,7 @@ interface Filters {
   status?: string;
   gender?: string;
   race?: string;
+  name?: string;
 }
 
 export const fetchUniversalFunction = async (filters: Filters = {}): Promise<IChar | ICharArray> => {
@@ -18,6 +19,9 @@ export const fetchUniversalFunction = async (filters: Filters = {}): Promise<ICh
     const params = new URLSearchParams();
 
     // Добавление фильтров в параметры запроса
+    if (filters.name) {
+      params.append('name', filters.name);
+    }
     if (filters.status) {
       params.append('status', filters.status);
     }
@@ -25,13 +29,13 @@ export const fetchUniversalFunction = async (filters: Filters = {}): Promise<ICh
       params.append('gender', filters.gender);
     }
     if (filters.race) {
-      params.append('race', filters.race);
+      params.append('species', filters.race);
     }
 
     // Определяем, нужно ли получать случайного персонажа
     const charNumber = Object.keys(filters).length === 0 ? getRandomCharacterId() : '';
     const url = charNumber ? `${CHAR_URL}${charNumber}` : `${CHAR_URL}?${params.toString()}`;
-
+    console.log(url);
     const response = await fetch(url);
     const data = await checkResponse<{ results?: ICharArray; info?: any }>(response);
 

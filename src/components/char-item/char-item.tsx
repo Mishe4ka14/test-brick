@@ -7,7 +7,7 @@ interface CharItemProps {
   character: IChar
 }
 
-export const CharItem: React.FC<CharItemProps> = ({ character }) => {
+const CharItem: React.FC<CharItemProps> = ({ character }) => {
   const itemRef = useRef<HTMLDivElement | null>(null); 
   const randomColor = getRandomGradient();
 
@@ -26,10 +26,10 @@ export const CharItem: React.FC<CharItemProps> = ({ character }) => {
   return (
     <div 
       ref={itemRef} 
-      className="flex flex-col sm:flex-row sm:justify-start sm:gap-[10vw] sm:items-center mt-[2vh] p-4 lg:ml-20 border border-white rounded-lg bg-[#26232e]"
+      className="flex flex-col sm:flex-row sm:justify-start sm:gap-0 sm:items-center mt-[2vh] p-4 lg:ml-20 border border-white rounded-lg bg-[#26232e]"
     >
       <h4
-        className="text-lg font-extrabold"
+        className="text-lg font-extrabold w-[80%] sm:w-[30%]"
         style={{
           background: randomColor,
           WebkitBackgroundClip: 'text',
@@ -38,7 +38,7 @@ export const CharItem: React.FC<CharItemProps> = ({ character }) => {
       >
         {name}
       </h4>
-      <div className="flex">
+      <div className="flex w-[80%] sm:w-[30%]">
         <p className="text-sm">Раса:&nbsp;</p>
         <p
           className="text-sm"
@@ -51,7 +51,7 @@ export const CharItem: React.FC<CharItemProps> = ({ character }) => {
           {species}
         </p>
       </div>
-      <div className="flex">
+      <div className="flex w-[80%] sm:w-[30%]">
         <p className="text-sm">Пол:&nbsp;</p>
         <p
           className="text-sm"
@@ -67,3 +67,5 @@ export const CharItem: React.FC<CharItemProps> = ({ character }) => {
     </div>
   );
 };
+
+export default React.memo(CharItem);

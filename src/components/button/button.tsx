@@ -3,7 +3,7 @@ import { gsap } from "gsap";
 import icon from '../../assets/nlo.png';
 
 interface SearchButtonProps {
-  onClick: () => Promise<void>;
+  onClick: () => Promise<void | (() => void)>;
 }
 
 const SearchButton: React.FC<SearchButtonProps> = ({ onClick }) => {
@@ -88,7 +88,7 @@ const SearchButton: React.FC<SearchButtonProps> = ({ onClick }) => {
     >
       <span
         ref={textRef}
-        className="absolute top-1/2 left-full ml-2 text-white flex"
+        className="absolute top-12 sm:top-1/2 sm:left-full ml-2 text-white flex"
       >
         {"...ИСКАТЬ...".split("").map((char, index) => (
           <span key={index} className="text-lg">{char}</span>

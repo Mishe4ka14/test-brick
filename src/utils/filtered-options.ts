@@ -12,7 +12,7 @@ export const filterOptions = {
   ],
   race: [
     { value: 'unknown', label: 'Неизвестно' },
-    { value: 'parasite', label: 'Паразит' },
+    { value: 'poopybutthole', label: 'Попосранчик' },
     { value: 'human', label: 'Человек' },
     { value: 'alien', label: 'Пришелец' },
     { value: 'humanoid', label: 'Гуманоид' },
